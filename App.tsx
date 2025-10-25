@@ -16,8 +16,13 @@ import AppDashboard from './components/AppDashboard';
 import PlanPreviewModal from './components/PlanPreviewModal';
 import FullPlanView from './components/FullPlanView';
 import Analytics from './components/Analytics';
+import DashboardPage from './DashboardPage';
+import BookBriefPage from './BookBriefPage';
+import MarketingPlanPage from './MarketingPlanPage';
+import OrganicPostPlanPage from './OrganicPostPlanPage';
+import FacebookPaidPostsPage from './FacebookPaidPostsPage';
 
-type ViewType = 'homepage' | 'dashboard' | 'plan-view' | 'analytics';
+type ViewType = 'homepage' | 'dashboard' | 'plan-view' | 'analytics' | 'book-brief' | 'marketing-plan' | 'organic-posts' | 'paid-posts';
 
 function AppContent() {
   const { user, signInWithEmail, signInWithGoogle } = useAuth();
@@ -107,6 +112,14 @@ function AppContent() {
     }
   };
 
+  const handleViewTask = (task: string) => {
+    setCurrentView(task as ViewType);
+  };
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard');
+  };
+
   if (currentView === 'plan-view') {
     return (
       <FullPlanView
@@ -119,16 +132,35 @@ function AppContent() {
 
   if (currentView === 'dashboard') {
     return (
-      <>
-        <AppDashboard onPlanComplete={handlePlanComplete} />
-        <PlanPreviewModal
-          isOpen={showPlanPreview}
-          onClose={() => setShowPlanPreview(false)}
-          onSelectPlan={handleSelectPlan}
-          bookTitle="Your Amazing Book"
-        />
-      </>
+      <DashboardPage
+        onViewTask={handleViewTask}
+        onViewPlan={() => setCurrentView('marketing-plan')}
+      />
     );
+  }
+
+  if (currentView === 'book-brief') {
+    return <BookBriefPage onBack={handleBackToDashboard} />;
+  }
+
+  if (currentView === 'marketing-plan') {
+    return (
+      <MarketingPlanPage
+        onBack={handleBackToDashboard}
+        onApprove={() => {
+          alert('Marketing plan approved!');
+          setCurrentView('dashboard');
+        }}
+      />
+    );
+  }
+
+  if (currentView === 'organic-posts') {
+    return <OrganicPostPlanPage onBack={handleBackToDashboard} />;
+  }
+
+  if (currentView === 'paid-posts') {
+    return <FacebookPaidPostsPage onBack={handleBackToDashboard} />;
   }
 
   if (currentView === 'analytics') {
