@@ -17,8 +17,10 @@ import BookBriefPage from './BookBriefPage';
 import MarketingPlanPage from './MarketingPlanPage';
 import OrganicPostPlanPage from './OrganicPostPlanPage';
 import FacebookPaidPostsPage from './FacebookPaidPostsPage';
+import FacebookSetupPage from './FacebookSetupPage';
+import ManageAdsPage from './ManageAdsPage';
 
-type ViewType = 'homepage' | 'dashboard' | 'plan-view' | 'analytics' | 'book-brief' | 'marketing-plan' | 'organic-posts' | 'paid-posts';
+type ViewType = 'homepage' | 'dashboard' | 'plan-view' | 'analytics' | 'book-brief' | 'marketing-plan' | 'organic-posts' | 'paid-posts' | 'facebook-setup' | 'manage-ads';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewType>('homepage');
@@ -124,6 +126,14 @@ function App() {
 
   if (currentView === 'paid-posts') {
     return <FacebookPaidPostsPage onBack={handleBackToDashboard} />;
+  }
+
+  if (currentView === 'facebook-setup') {
+    return <FacebookSetupPage onBack={handleBackToDashboard} />;
+  }
+
+  if (currentView === 'manage-ads') {
+    return <ManageAdsPage onBack={handleBackToDashboard} />;
   }
 
   if (currentView === 'analytics') {

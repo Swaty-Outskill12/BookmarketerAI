@@ -12,8 +12,8 @@ export default function DashboardPage({ onViewTask, onViewPlan }: DashboardPageP
     { id: 2, title: 'Build Marketing Plan (1)', status: 'To do', action: 'marketing-plan' },
     { id: 3, title: 'Build Organic Post (6)', status: 'To do', action: 'organic-posts' },
     { id: 4, title: 'Create Facebook Paid Ads (10)', status: 'To do', action: 'paid-posts' },
-    { id: 5, title: 'Start on Facebook (Setup)', status: 'To do', action: 'setup' },
-    { id: 6, title: 'Optimize Campaigns', status: 'To do', action: 'optimize' }
+    { id: 5, title: 'Start on Facebook (Setup)', status: 'To do', action: 'facebook-setup' },
+    { id: 6, title: 'Optimize Campaigns', status: 'To do', action: 'manage-ads' }
   ];
 
   return (
