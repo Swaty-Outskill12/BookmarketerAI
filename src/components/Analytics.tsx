@@ -43,7 +43,7 @@ export default function Analytics() {
         { label: 'Conversions', value: '5.2K', icon: Users, color: 'from-green-500 to-green-600' },
         { label: 'Spend', value: '$13,324', icon: DollarSign, color: 'from-orange-500 to-orange-600' },
         { label: 'Revenue', value: '$37K', icon: BarChart3, color: 'from-emerald-500 to-emerald-600' },
-        { label: 'CPC', value: '$0.98', icon: Activity, color: 'from-purple-500 to-purple-600' },
+        { label: 'CPC', value: '$0.98', icon: Activity, color: 'from-[#22c9a8] to-[#0077be]' },
         { label: 'ROAS', value: '7.04', icon: TrendingUp, color: 'from-pink-500 to-pink-600' }
       ];
 

@@ -1,6 +1,6 @@
 import { ArrowLeft, Check } from 'lucide-react';
 import { useState } from 'react';
-import PageLayout from './PageLayout';
+
 import ChatInterface from './ChatInterface';
 
 interface FacebookSetupPageProps {
@@ -11,14 +11,14 @@ export default function FacebookSetupPage({ onBack }: FacebookSetupPageProps) {
   const [isCompleted, setIsCompleted] = useState(false);
 
   return (
-    <PageLayout title="BOOK BUILDER PAGE">
+    <>
       <ChatInterface showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-4xl">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium mb-6 transition-colors"
+            className="flex items-center gap-2 text-[#0077be] hover:text-[#22c9a8] font-medium mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
             FACEBOOK SETUP
@@ -47,7 +47,7 @@ export default function FacebookSetupPage({ onBack }: FacebookSetupPageProps) {
                     href="http://facebook.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-800 underline transition-colors"
+                    className="text-[#0077be] hover:text-[#22c9a8] underline transition-colors"
                   >
                     facebook.com
                   </a>{' '}
@@ -73,7 +73,7 @@ export default function FacebookSetupPage({ onBack }: FacebookSetupPageProps) {
                     href="http://facebook.com/pages/create"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-800 underline transition-colors"
+                    className="text-[#0077be] hover:text-[#22c9a8] underline transition-colors"
                   >
                     facebook.com/pages/create
                   </a>
@@ -108,7 +108,7 @@ export default function FacebookSetupPage({ onBack }: FacebookSetupPageProps) {
                     href="http://business.facebook.com/overview"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-800 underline transition-colors"
+                    className="text-[#0077be] hover:text-[#22c9a8] underline transition-colors"
                   >
                     business.facebook.com/overview
                   </a>{' '}
@@ -155,8 +155,8 @@ export default function FacebookSetupPage({ onBack }: FacebookSetupPageProps) {
                   onClick={() => setIsCompleted(!isCompleted)}
                   className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-all ${
                     isCompleted
-                      ? 'bg-purple-600 border-purple-600'
-                      : 'border-gray-300 hover:border-purple-400'
+                      ? 'bg-[#0077be] border-[#0077be]'
+                      : 'border-gray-300 hover:border-[#6dd4c2]'
                   }`}
                 >
                   {isCompleted && <Check size={16} className="text-white" />}
@@ -169,6 +169,6 @@ export default function FacebookSetupPage({ onBack }: FacebookSetupPageProps) {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 }

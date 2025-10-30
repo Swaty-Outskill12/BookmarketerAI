@@ -61,7 +61,7 @@ export default function ChatInterface({ onViewPlan, showPlanButton = true }: Cha
           <div className="pt-2">
             <button
               onClick={onViewPlan}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+              className="w-full bg-gradient-to-r from-[#0077be] to-[#22c9a8] hover:brightness-110 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
             >
               View and Approve Your Book's Marketing Plan
             </button>
@@ -71,15 +71,15 @@ export default function ChatInterface({ onViewPlan, showPlanButton = true }: Cha
 
       <div className="border-t border-gray-200 p-4 bg-white">
         <div className="flex items-center gap-2">
-          <button className="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+          <button className="p-2 text-gray-400 hover:text-[#0077be] transition-colors">
             <Mic size={20} />
           </button>
           <input
             type="text"
             placeholder="Type here"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#22c9a8] focus:border-transparent"
           />
-          <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+          <button className="bg-gradient-to-r from-[#0077be] to-[#22c9a8] hover:brightness-110 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
             <Send size={18} />
             <span className="hidden sm:inline">Send</span>
           </button>

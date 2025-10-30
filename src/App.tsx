@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Problem from './components/Problem';
@@ -13,33 +13,54 @@ import Footer from './components/Footer';
 import FullPlanView from './components/FullPlanView';
 import Analytics from './components/Analytics';
 import DashboardPage from './DashboardPage';
-import BookBriefPage from './BookBriefPage';
+import BookBriefPageEnhanced from './BookBriefPageEnhanced';
 import MarketingPlanPage from './MarketingPlanPage';
 import OrganicPostPlanPage from './OrganicPostPlanPage';
 import FacebookPaidPostsPage from './FacebookPaidPostsPage';
 import FacebookSetupPage from './FacebookSetupPage';
 import ManageAdsPage from './ManageAdsPage';
+import AuthPage from './AuthPage';
+import HelpPage from './HelpPage';
+import PageLayout from './PageLayout';
 
-type ViewType = 'homepage' | 'dashboard' | 'plan-view' | 'analytics' | 'book-brief' | 'marketing-plan' | 'organic-posts' | 'paid-posts' | 'facebook-setup' | 'manage-ads';
+type ViewType = 'homepage' | 'auth' | 'dashboard' | 'plan-view' | 'analytics' | 'book-brief' | 'marketing-plan' | 'organic-posts' | 'paid-posts' | 'facebook-setup' | 'manage-ads' | 'help';
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewType>('homepage');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
+    setIsAuthenticated(authStatus);
+  }, []);
+
   const handleGetStarted = () => {
-    setCurrentView('dashboard');
+    if (isAuthenticated) {
+      setCurrentView('dashboard');
+    } else {
+      setCurrentView('auth');
+    }
   };
 
   const handleTryDemo = () => {
-    setCurrentView('dashboard');
+    if (isAuthenticated) {
+      setCurrentView('dashboard');
+    } else {
+      setCurrentView('auth');
+    }
   };
 
   const handleSelectPlan = (plan: 'monthly' | '6months') => {
-    alert(`Selected ${plan} plan. Payment integration would go here.`);
-    setCurrentView('plan-view');
+    if (isAuthenticated) {
+      alert(`Selected ${plan} plan. Payment integration would go here.`);
+      setCurrentView('plan-view');
+    } else {
+      setCurrentView('auth');
+    }
   };
 
   const handleApprovePlan = () => {
@@ -74,6 +95,10 @@ function App() {
       }, 100);
     } else if (section === 'analytics') {
       setCurrentView('analytics');
+    } else if (section === 'dashboard') {
+      setCurrentView('dashboard');
+    } else if (section === 'auth') {
+      setCurrentView('auth');
     }
   };
 
@@ -84,6 +109,28 @@ function App() {
   const handleBackToDashboard = () => {
     setCurrentView('dashboard');
   };
+
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+    setCurrentView('dashboard');
+  };
+
+  const handleStepClick = (stepId: string) => {
+    setCurrentView(stepId as ViewType);
+  };
+
+  if (currentView === 'auth') {
+    return (
+      <AuthPage
+        onAuthenticated={handleAuthenticated}
+        onBackToHome={handleBackToHomepage}
+      />
+    );
+  }
+
+  if (currentView === 'help') {
+    return <HelpPage onBack={() => setCurrentView('organic-posts')} />;
+  }
 
   if (currentView === 'plan-view') {
     return (
@@ -97,43 +144,104 @@ function App() {
 
   if (currentView === 'dashboard') {
     return (
-      <DashboardPage
-        onViewTask={handleViewTask}
-        onViewPlan={() => setCurrentView('marketing-plan')}
-      />
+      <PageLayout
+        currentStep="dashboard"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <DashboardPage
+          onViewTask={handleViewTask}
+          onViewPlan={() => setCurrentView('marketing-plan')}
+        />
+      </PageLayout>
     );
   }
 
   if (currentView === 'book-brief') {
-    return <BookBriefPage onBack={handleBackToDashboard} />;
+    return (
+      <PageLayout
+        currentStep="book-brief"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <BookBriefPageEnhanced
+          onBack={handleBackToDashboard}
+          onSave={(data) => {
+            console.log('Book brief saved:', data);
+            alert('Book brief saved successfully!');
+          }}
+        />
+      </PageLayout>
+    );
   }
 
   if (currentView === 'marketing-plan') {
     return (
-      <MarketingPlanPage
-        onBack={handleBackToDashboard}
-        onApprove={() => {
-          alert('Marketing plan approved!');
-          setCurrentView('dashboard');
-        }}
-      />
+      <PageLayout
+        currentStep="marketing-plan"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <MarketingPlanPage
+          onBack={handleBackToDashboard}
+          onApprove={() => {
+            alert('Marketing plan approved!');
+            setCurrentView('dashboard');
+          }}
+        />
+      </PageLayout>
     );
   }
 
   if (currentView === 'organic-posts') {
-    return <OrganicPostPlanPage onBack={handleBackToDashboard} />;
+    return (
+      <PageLayout
+        currentStep="organic-posts"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <OrganicPostPlanPage
+          onBack={handleBackToDashboard}
+          onHelp={() => setCurrentView('help')}
+        />
+      </PageLayout>
+    );
   }
 
   if (currentView === 'paid-posts') {
-    return <FacebookPaidPostsPage onBack={handleBackToDashboard} />;
+    return (
+      <PageLayout
+        currentStep="paid-posts"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <FacebookPaidPostsPage onBack={handleBackToDashboard} />
+      </PageLayout>
+    );
   }
 
   if (currentView === 'facebook-setup') {
-    return <FacebookSetupPage onBack={handleBackToDashboard} />;
+    return (
+      <PageLayout
+        currentStep="facebook-setup"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <FacebookSetupPage onBack={handleBackToDashboard} />
+      </PageLayout>
+    );
   }
 
   if (currentView === 'manage-ads') {
-    return <ManageAdsPage onBack={handleBackToDashboard} />;
+    return (
+      <PageLayout
+        currentStep="manage-ads"
+        onNavigate={handleNavigate}
+        onStepClick={handleStepClick}
+      >
+        <ManageAdsPage onBack={handleBackToDashboard} />
+      </PageLayout>
+    );
   }
 
   if (currentView === 'analytics') {
@@ -141,8 +249,10 @@ function App() {
       <>
         <Header
           onNavigate={handleNavigate}
-          onLogin={() => {}}
-          onSignUp={() => {}}
+          onLogin={() => setCurrentView('auth')}
+          onSignUp={() => setCurrentView('auth')}
+          showDashboardLink={isAuthenticated}
+          isAuthenticated={isAuthenticated}
         />
         <Analytics />
         <Footer />
@@ -154,8 +264,9 @@ function App() {
     <>
       <Header
         onNavigate={handleNavigate}
-        onLogin={() => {}}
-        onSignUp={() => {}}
+        onLogin={() => setCurrentView('auth')}
+        onSignUp={() => setCurrentView('auth')}
+        isAuthenticated={isAuthenticated}
       />
       <div ref={heroRef}>
         <Hero onGetStarted={handleGetStarted} onTryDemo={handleTryDemo} />

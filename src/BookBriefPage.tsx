@@ -15,7 +15,7 @@ export default function BookBriefPage({ onBack }: BookBriefPageProps) {
         <div className="max-w-3xl">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium mb-6 transition-colors"
+            className="flex items-center gap-2 text-[#0077be] hover:text-[#22c9a8] font-medium mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
             Book Brief

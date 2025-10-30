@@ -1,4 +1,3 @@
-import PageLayout from './PageLayout';
 import ChatInterface from './ChatInterface';
 
 interface DashboardPageProps {
@@ -17,7 +16,7 @@ export default function DashboardPage({ onViewTask, onViewPlan }: DashboardPageP
   ];
 
   return (
-    <PageLayout title="BOOK BUILDER PAGE">
+    <>
       <ChatInterface onViewPlan={onViewPlan} showPlanButton={true} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
@@ -40,7 +39,7 @@ export default function DashboardPage({ onViewTask, onViewPlan }: DashboardPageP
                 </div>
                 <button
                   onClick={() => onViewTask(task.action)}
-                  className="text-purple-600 hover:text-purple-800 font-medium text-sm transition-colors"
+                  className="text-[#0077be] hover:text-[#22c9a8] font-medium text-sm transition-colors"
                 >
                   View
                 </button>
@@ -49,6 +48,6 @@ export default function DashboardPage({ onViewTask, onViewPlan }: DashboardPageP
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 }

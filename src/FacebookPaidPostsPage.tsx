@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
-import PageLayout from './PageLayout';
+
 import ChatInterface from './ChatInterface';
 
 interface FacebookPaidPostsPageProps {
@@ -8,14 +8,14 @@ interface FacebookPaidPostsPageProps {
 
 export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageProps) {
   return (
-    <PageLayout title="BOOK BUILDER PAGE - PAID POST">
+    <>
       <ChatInterface showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-4xl">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium mb-6 transition-colors"
+            className="flex items-center gap-2 text-[#0077be] hover:text-[#22c9a8] font-medium mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
             ORGANIC POST PLAN
@@ -28,10 +28,10 @@ export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageP
               <span className="text-xl font-bold text-gray-800">AD1</span>
               <span className="text-gray-600">status: Not Deployed / Live / Pause</span>
               <div className="flex items-center gap-2 ml-auto">
-                <button className="p-1 text-gray-600 hover:text-purple-600 transition-colors">
+                <button className="p-1 text-gray-600 hover:text-[#0077be] transition-colors">
                   <ChevronLeft size={20} />
                 </button>
-                <button className="p-1 text-gray-600 hover:text-purple-600 transition-colors">
+                <button className="p-1 text-gray-600 hover:text-[#0077be] transition-colors">
                   <ChevronRight size={20} />
                 </button>
               </div>
@@ -97,10 +97,10 @@ export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageP
               </div>
               <div className="pt-2">
                 <span className="font-semibold">Media (links): </span>
-                <button className="text-purple-600 hover:text-purple-800 font-medium ml-2 transition-colors">
+                <button className="text-[#0077be] hover:text-[#22c9a8] font-medium ml-2 transition-colors">
                   Generate
                 </button>
-                <button className="text-purple-600 hover:text-purple-800 font-medium ml-4 transition-colors">
+                <button className="text-[#0077be] hover:text-[#22c9a8] font-medium ml-4 transition-colors">
                   Upload Own
                 </button>
               </div>
@@ -112,7 +112,7 @@ export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageP
             <div className="border border-gray-300 rounded-lg p-4 bg-white shadow-sm max-w-md">
               <div className="mb-3">
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full"></div>
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#22c9a8] to-blue-500 rounded-full"></div>
                   <div>
                     <div className="font-semibold text-sm">AI ML</div>
                     <div className="text-xs text-gray-500">sponsored</div>
@@ -123,7 +123,7 @@ export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageP
               <div className="mb-3">
                 <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg p-8 flex items-center justify-center mb-3">
                   <div className="text-center">
-                    <div className="w-24 h-24 bg-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <div className="w-24 h-24 bg-[#0077be] rounded-full mx-auto mb-4 flex items-center justify-center">
                       <div className="w-16 h-16 bg-white rounded-full"></div>
                     </div>
                     <div className="text-4xl mb-2">🎁</div>
@@ -148,7 +148,7 @@ export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageP
                 <p className="text-xs text-gray-600 mb-2">
                   AI ML. Sign up today and get Free Credits...
                 </p>
-                <button className="text-sm font-semibold text-gray-700 hover:text-purple-600 transition-colors">
+                <button className="text-sm font-semibold text-gray-700 hover:text-[#0077be] transition-colors">
                   Join Now
                 </button>
               </div>
@@ -156,6 +156,6 @@ export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageP
           </section>
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 }

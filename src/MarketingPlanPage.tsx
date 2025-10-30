@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import PageLayout from './PageLayout';
+
 import ChatInterface from './ChatInterface';
 
 interface MarketingPlanPageProps {
@@ -9,7 +9,7 @@ interface MarketingPlanPageProps {
 
 export default function MarketingPlanPage({ onBack, onApprove }: MarketingPlanPageProps) {
   return (
-    <PageLayout title="BOOK BUILDER PAGE - MARKETING PLAN">
+    <>
       <ChatInterface showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
@@ -17,14 +17,14 @@ export default function MarketingPlanPage({ onBack, onApprove }: MarketingPlanPa
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium transition-colors"
+              className="flex items-center gap-2 text-[#0077be] hover:text-[#22c9a8] font-medium transition-colors"
             >
               <ArrowLeft size={20} />
               MARKETING PLAN
             </button>
             <button
               onClick={onApprove}
-              className="text-purple-600 hover:text-purple-800 font-semibold transition-colors"
+              className="text-[#0077be] hover:text-[#22c9a8] font-semibold transition-colors"
             >
               Approve and Proceed
             </button>
@@ -113,6 +113,6 @@ export default function MarketingPlanPage({ onBack, onApprove }: MarketingPlanPa
           </section>
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 }

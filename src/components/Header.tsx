@@ -2,9 +2,11 @@ interface HeaderProps {
   onNavigate: (section: string) => void;
   onLogin: () => void;
   onSignUp: () => void;
+  showDashboardLink?: boolean;
+  isAuthenticated?: boolean;
 }
 
-export default function Header({ onNavigate, onLogin, onSignUp }: HeaderProps) {
+export default function Header({ onNavigate, onLogin, onSignUp, showDashboardLink = false, isAuthenticated = false }: HeaderProps) {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -26,6 +28,14 @@ export default function Header({ onNavigate, onLogin, onSignUp }: HeaderProps) {
           </div>
 
           <nav className="hidden lg:flex items-center gap-8">
+            {showDashboardLink && (
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="text-[#1a2332] hover:text-[#22c9a8] transition-colors font-medium text-lg"
+              >
+                Dashboard
+              </button>
+            )}
             <button
               onClick={() => onNavigate('about')}
               className="text-[#1a2332] hover:text-[#22c9a8] transition-colors font-medium text-lg"
@@ -53,18 +63,39 @@ export default function Header({ onNavigate, onLogin, onSignUp }: HeaderProps) {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <button
-              onClick={onLogin}
-              className="text-[#1a2332] hover:text-[#22c9a8] transition-colors font-medium text-sm sm:text-base lg:text-lg"
-            >
-              Login
-            </button>
-            <button
-              onClick={onSignUp}
-              className="bg-gradient-to-r from-[#0077be] to-[#22c9a8] text-white px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 hover:brightness-110 hover:shadow-lg"
-            >
-              Sign Up
-            </button>
+            {!isAuthenticated ? (
+              <>
+                <button
+                  onClick={onLogin}
+                  className="text-[#1a2332] hover:text-[#22c9a8] transition-colors font-medium text-sm sm:text-base lg:text-lg"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={onSignUp}
+                  className="bg-gradient-to-r from-[#0077be] to-[#22c9a8] text-white px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-lg font-semibold text-sm sm:text-base transition-all duration-200 hover:brightness-110 hover:shadow-lg"
+                >
+                  Sign Up
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:block text-sm text-gray-600">
+                  {localStorage.getItem('userName') || localStorage.getItem('userEmail')}
+                </div>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('isAuthenticated');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userName');
+                    onNavigate('home');
+                  }}
+                  className="text-[#1a2332] hover:text-[#22c9a8] transition-colors font-medium text-sm sm:text-base"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

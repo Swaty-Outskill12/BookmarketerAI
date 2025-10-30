@@ -1,5 +1,5 @@
 import { ArrowLeft } from 'lucide-react';
-import PageLayout from './PageLayout';
+
 import ChatInterface from './ChatInterface';
 
 interface ManageAdsPageProps {
@@ -8,14 +8,14 @@ interface ManageAdsPageProps {
 
 export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
   return (
-    <PageLayout title="BOOK BUILDER PAGE">
+    <>
       <ChatInterface showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-6xl">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-purple-600 hover:text-purple-800 font-medium mb-6 transition-colors"
+            className="flex items-center gap-2 text-[#0077be] hover:text-[#22c9a8] font-medium mb-6 transition-colors"
           >
             <ArrowLeft size={20} />
             MANAGE ADS
@@ -23,7 +23,7 @@ export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
 
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Facebook Paid ADS</h1>
-            <button className="text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+            <button className="text-[#0077be] hover:text-[#22c9a8] font-semibold transition-colors">
               Create More Ads
             </button>
           </div>
@@ -63,7 +63,7 @@ export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
           <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-gray-800">
               <strong>Suggestion</strong> - You have only 1 ad running for $15/day. Your budget is $30/day.{' '}
-              <button className="text-purple-600 hover:text-purple-800 font-semibold underline transition-colors">
+              <button className="text-[#0077be] hover:text-[#22c9a8] font-semibold underline transition-colors">
                 Deploy Another Ad by Clicking Here
               </button>
             </p>
@@ -107,7 +107,7 @@ export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
                   <td className="px-4 py-4">
                     <div className="text-sm text-gray-700">
                       Increase Budget by $12 per day{' '}
-                      <button className="text-purple-600 hover:text-purple-800 font-semibold ml-2 transition-colors">
+                      <button className="text-[#0077be] hover:text-[#22c9a8] font-semibold ml-2 transition-colors">
                         Apply
                       </button>
                     </div>
@@ -135,10 +135,10 @@ export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
                     <div className="text-sm space-y-1">
                       <p className="text-gray-700">Pause this Ad, and deploy another one to test</p>
                       <div className="space-x-3">
-                        <button className="text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+                        <button className="text-[#0077be] hover:text-[#22c9a8] font-semibold transition-colors">
                           Pause Ad
                         </button>
-                        <button className="text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+                        <button className="text-[#0077be] hover:text-[#22c9a8] font-semibold transition-colors">
                           Pause and Deploy Next Ad
                         </button>
                       </div>
@@ -150,6 +150,6 @@ export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
           </div>
         </div>
       </div>
-    </PageLayout>
+    </>
   );
 }
