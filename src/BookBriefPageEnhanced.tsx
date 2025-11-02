@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { ArrowLeft, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Save, RefreshCw, AlertCircle } from 'lucide-react';
 import MultiSelect from './components/MultiSelect';
+import { useAuth } from './AuthContext';
+import { fetchBookInfo, saveBookBrief, getBookBrief, BookInfo } from './lib/bookApi';
 
 interface BookBriefPageEnhancedProps {
   onBack: () => void;
@@ -54,7 +56,10 @@ const BRAND_VOICES = [
   'Humorous', 'Empathetic', 'Educational', 'Conversational', 'Sophisticated'
 ];
 
+const DEFAULT_AUTHOR_ID = 'bf00646e-1204-4b1a-9886-b7b895b1554a';
+
 export default function BookBriefPageEnhanced({ onBack, onSave }: BookBriefPageEnhancedProps) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<BookBriefData>({
     bookTitle: '',
     authorName: '',
@@ -71,9 +76,117 @@ export default function BookBriefPageEnhanced({ onBack, onSave }: BookBriefPageE
     uniqueOfferings: [],
     brandVoice: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [isDataFetched, setIsDataFetched] = useState(false);
 
-  const handleSave = () => {
-    onSave?.(formData);
+  useEffect(() => {
+    loadExistingBookBrief();
+  }, [user]);
+
+  const loadExistingBookBrief = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const existingBrief = await getBookBrief(user.id);
+
+      if (existingBrief) {
+        setFormData({
+          bookTitle: existingBrief.book_title || '',
+          authorName: existingBrief.author_name || '',
+          bookType: existingBrief.book_type || '',
+          formats: existingBrief.format || [],
+          genre: existingBrief.genre || '',
+          marketingBudget: existingBrief.marketing_budget?.toString() || '',
+          bookPrice: existingBrief.book_price?.toString() || '',
+          bookCost: existingBrief.book_cost?.toString() || '',
+          painPoints: existingBrief.pain_points || [],
+          targetAudience: existingBrief.target_audience || [],
+          geography: existingBrief.geography || [],
+          competitors: existingBrief.competitors || [],
+          uniqueOfferings: existingBrief.unique_offerings || [],
+          brandVoice: existingBrief.brand_voice || ''
+        });
+        setIsDataFetched(true);
+      } else {
+        await fetchAndPopulateBookInfo();
+      }
+    } catch (err) {
+      console.error('Error loading book brief:', err);
+      await fetchAndPopulateBookInfo();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAndPopulateBookInfo = async () => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const bookInfo = await fetchBookInfo(DEFAULT_AUTHOR_ID);
+
+      if (bookInfo) {
+        setFormData({
+          bookTitle: bookInfo.bookTitle || '',
+          authorName: bookInfo.authorName || '',
+          bookType: bookInfo.bookType || '',
+          formats: bookInfo.formats || [],
+          genre: bookInfo.genre || '',
+          marketingBudget: bookInfo.marketingBudget || '',
+          bookPrice: bookInfo.bookPrice || '',
+          bookCost: bookInfo.bookCost || '',
+          painPoints: bookInfo.painPoints || [],
+          targetAudience: bookInfo.targetAudience || [],
+          geography: bookInfo.geography || [],
+          competitors: bookInfo.competitors || [],
+          uniqueOfferings: bookInfo.uniqueOfferings || [],
+          brandVoice: bookInfo.brandVoice || ''
+        });
+        setIsDataFetched(true);
+      }
+    } catch (err) {
+      setError('Failed to fetch book information. You can still fill in the form manually.');
+      console.error('Error fetching book info:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    if (confirm('This will replace all current data with fresh data from the server. Continue?')) {
+      fetchAndPopulateBookInfo();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      setError('You must be logged in to save a book brief.');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+      setSuccess(false);
+
+      await saveBookBrief(user.id, DEFAULT_AUTHOR_ID, formData);
+
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+
+      onSave?.(formData);
+    } catch (err) {
+      setError('Failed to save book brief. Please try again.');
+      console.error('Error saving book brief:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -87,16 +200,57 @@ export default function BookBriefPageEnhanced({ onBack, onSave }: BookBriefPageE
             <ArrowLeft size={20} />
             Back to Dashboard
           </button>
-          <button
-            onClick={handleSave}
-            className="flex items-center gap-2 bg-gradient-to-r from-[#0077be] to-[#22c9a8] text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:brightness-110 hover:shadow-lg"
-          >
-            <Save size={18} />
-            Save Book Brief
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+              Refresh Data
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || loading}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0077be] to-[#22c9a8] text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:brightness-110 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Save size={18} />
+              {saving ? 'Saving...' : 'Save Book Brief'}
+            </button>
+          </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Book Brief</h1>
+        {loading && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+            <RefreshCw size={20} className="text-blue-600 animate-spin" />
+            <p className="text-blue-800">Loading book information...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <AlertCircle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-red-800">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+              <Save size={14} className="text-white" />
+            </div>
+            <p className="text-green-800 font-medium">Book brief saved successfully!</p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Book Brief</h1>
+          {isDataFetched && !loading && (
+            <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+              Data auto-populated
+            </span>
+          )}
+        </div>
 
         <div className="space-y-6">
           <div>
