@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mail, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from './AuthContext';
 
 interface AuthPageProps {
   onAuthenticated: () => void;
@@ -7,8 +8,11 @@ interface AuthPageProps {
 }
 
 export default function AuthPage({ onAuthenticated, onBackToHome }: AuthPageProps) {
+  const { signInWithPassword, signUpWithPassword, signInWithGoogle } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,20 +20,48 @@ export default function AuthPage({ onAuthenticated, onBackToHome }: AuthPageProp
     confirmPassword: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userEmail', formData.email);
-    if (!isLogin) {
-      localStorage.setItem('userName', formData.fullName);
+    setError('');
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        await signInWithPassword(formData.email, formData.password);
+        onAuthenticated();
+      } else {
+        if (formData.password !== formData.confirmPassword) {
+          setError('Passwords do not match');
+          setLoading(false);
+          return;
+        }
+
+        if (formData.password.length < 6) {
+          setError('Password must be at least 6 characters');
+          setLoading(false);
+          return;
+        }
+
+        await signUpWithPassword(formData.email, formData.password, formData.fullName);
+        setError('Account created! Please check your email to verify your account.');
+        setFormData({ email: '', password: '', fullName: '', confirmPassword: '' });
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during authentication');
+    } finally {
+      setLoading(false);
     }
-    onAuthenticated();
   };
 
-  const handleGoogleLogin = () => {
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userEmail', 'user@gmail.com');
-    onAuthenticated();
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(err.message || 'An error occurred with Google sign-in');
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,9 +110,16 @@ export default function AuthPage({ onAuthenticated, onBackToHome }: AuthPageProp
             </button>
           </div>
 
+          {error && (
+            <div className={`mb-4 p-3 rounded-lg ${error.includes('created') ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+              {error}
+            </div>
+          )}
+
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg px-6 py-3 font-semibold hover:bg-gray-50 transition-all duration-200 hover:shadow-md mb-6"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg px-6 py-3 font-semibold hover:bg-gray-50 transition-all duration-200 hover:shadow-md mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path
@@ -196,10 +235,11 @@ export default function AuthPage({ onAuthenticated, onBackToHome }: AuthPageProp
 
             <button
               type="submit"
-              className="w-full btn-primary flex items-center justify-center gap-2"
+              disabled={loading}
+              className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Mail size={20} />
-              {isLogin ? 'Sign In' : 'Create Account'}
+              {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
             </button>
           </form>
 

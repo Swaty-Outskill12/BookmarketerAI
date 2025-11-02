@@ -1,5 +1,6 @@
 import { X, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { useAuth } from './AuthContext';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -9,14 +10,42 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, onLogin, onGoogleLogin }: LoginModalProps) {
+  const { signInWithEmail, signInWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      onLogin(email);
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      if (email) {
+        await signInWithEmail(email);
+        setSuccess('Check your email for the magic link!');
+        setEmail('');
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      setError(err.message || 'An error occurred with Google sign-in');
+      setLoading(false);
     }
   };
 
@@ -33,9 +62,22 @@ export default function LoginModal({ isOpen, onClose, onLogin, onGoogleLogin }: 
         <h2 className="text-3xl font-bold mb-2 text-[#2D2D2D]">Login to build Your Marketing Plan</h2>
         <p className="text-gray-600 mb-8">Get started in just a few clicks</p>
 
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-800 border border-red-200">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 rounded-lg bg-green-50 text-green-800 border border-green-200">
+            {success}
+          </div>
+        )}
+
         <button
-          onClick={onGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg px-6 py-3 font-semibold hover:bg-gray-50 transition-colors mb-6"
+          onClick={handleGoogleLogin}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-3 border-2 border-gray-300 rounded-lg px-6 py-3 font-semibold hover:bg-gray-50 transition-colors mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -79,9 +121,13 @@ export default function LoginModal({ isOpen, onClose, onLogin, onGoogleLogin }: 
             />
           </div>
 
-          <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Mail size={20} />
-            Continue with email
+            {loading ? 'Please wait...' : 'Continue with email'}
           </button>
         </form>
       </div>

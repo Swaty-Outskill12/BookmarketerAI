@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Problem from './components/Problem';
@@ -26,17 +27,14 @@ import PageLayout from './PageLayout';
 type ViewType = 'homepage' | 'auth' | 'dashboard' | 'plan-view' | 'analytics' | 'book-brief' | 'marketing-plan' | 'organic-posts' | 'paid-posts' | 'facebook-setup' | 'manage-ads' | 'help';
 
 function App() {
+  const { user, loading } = useAuth();
   const [currentView, setCurrentView] = useState<ViewType>('homepage');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const authStatus = localStorage.getItem('isAuthenticated') === 'true';
-    setIsAuthenticated(authStatus);
-  }, []);
+  const isAuthenticated = !!user;
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
@@ -111,13 +109,23 @@ function App() {
   };
 
   const handleAuthenticated = () => {
-    setIsAuthenticated(true);
     setCurrentView('dashboard');
   };
 
   const handleStepClick = (stepId: string) => {
     setCurrentView(stepId as ViewType);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0077be] mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (currentView === 'auth') {
     return (

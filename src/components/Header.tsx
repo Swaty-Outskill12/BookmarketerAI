@@ -1,3 +1,6 @@
+import { useAuth } from '../AuthContext';
+import { useState, useEffect } from 'react';
+
 interface HeaderProps {
   onNavigate: (section: string) => void;
   onLogin: () => void;
@@ -6,7 +9,37 @@ interface HeaderProps {
   isAuthenticated?: boolean;
 }
 
+interface Profile {
+  full_name: string | null;
+  email: string;
+}
+
 export default function Header({ onNavigate, onLogin, onSignUp, showDashboardLink = false, isAuthenticated = false }: HeaderProps) {
+  const { user, signOut } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        full_name: user.user_metadata?.full_name || null,
+        email: user.email || ''
+      });
+    } else {
+      setProfile(null);
+    }
+  }, [user]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      onNavigate('home');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  const displayName = profile?.full_name || profile?.email || 'User';
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
@@ -81,15 +114,10 @@ export default function Header({ onNavigate, onLogin, onSignUp, showDashboardLin
             ) : (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:block text-sm text-gray-600">
-                  {localStorage.getItem('userName') || localStorage.getItem('userEmail')}
+                  {displayName}
                 </div>
                 <button
-                  onClick={() => {
-                    localStorage.removeItem('isAuthenticated');
-                    localStorage.removeItem('userEmail');
-                    localStorage.removeItem('userName');
-                    onNavigate('home');
-                  }}
+                  onClick={handleLogout}
                   className="text-[#1a2332] hover:text-[#22c9a8] transition-colors font-medium text-sm sm:text-base"
                 >
                   Logout
