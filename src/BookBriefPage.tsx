@@ -1,15 +1,17 @@
 import { ArrowLeft } from 'lucide-react';
 import PageLayout from './PageLayout';
 import ChatInterface from './ChatInterface';
+import { useAuth } from './AuthContext';
 
 interface BookBriefPageProps {
   onBack: () => void;
 }
 
 export default function BookBriefPage({ onBack }: BookBriefPageProps) {
+  const { user } = useAuth();
   return (
     <PageLayout title="BOOK BUILDER PAGE - BOOK BRIEF">
-      <ChatInterface showPlanButton={false} />
+      <ChatInterface userId={user?.id} showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-3xl">

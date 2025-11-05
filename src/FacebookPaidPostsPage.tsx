@@ -1,15 +1,17 @@
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import ChatInterface from './ChatInterface';
+import { useAuth } from './AuthContext';
 
 interface FacebookPaidPostsPageProps {
   onBack: () => void;
 }
 
 export default function FacebookPaidPostsPage({ onBack }: FacebookPaidPostsPageProps) {
+  const { user } = useAuth();
   return (
     <>
-      <ChatInterface showPlanButton={false} />
+      <ChatInterface userId={user?.id} showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-4xl">

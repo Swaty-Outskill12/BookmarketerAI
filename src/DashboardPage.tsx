@@ -1,4 +1,5 @@
 import ChatInterface from './ChatInterface';
+import { useAuth } from './AuthContext';
 
 interface DashboardPageProps {
   onViewTask: (task: string) => void;
@@ -6,6 +7,7 @@ interface DashboardPageProps {
 }
 
 export default function DashboardPage({ onViewTask, onViewPlan }: DashboardPageProps) {
+  const { user } = useAuth();
   const tasks = [
     { id: 1, title: 'Book Brief', status: 'Done', action: 'book-brief' },
     { id: 2, title: 'Build Marketing Plan (1)', status: 'To do', action: 'marketing-plan' },
@@ -17,7 +19,7 @@ export default function DashboardPage({ onViewTask, onViewPlan }: DashboardPageP
 
   return (
     <>
-      <ChatInterface onViewPlan={onViewPlan} showPlanButton={true} />
+      <ChatInterface userId={user?.id} onViewPlan={onViewPlan} showPlanButton={true} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-3xl">

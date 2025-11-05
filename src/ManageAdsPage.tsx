@@ -1,15 +1,17 @@
 import { ArrowLeft } from 'lucide-react';
 
 import ChatInterface from './ChatInterface';
+import { useAuth } from './AuthContext';
 
 interface ManageAdsPageProps {
   onBack: () => void;
 }
 
 export default function ManageAdsPage({ onBack }: ManageAdsPageProps) {
+  const { user } = useAuth();
   return (
     <>
-      <ChatInterface showPlanButton={false} />
+      <ChatInterface userId={user?.id} showPlanButton={false} />
 
       <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-6xl">
