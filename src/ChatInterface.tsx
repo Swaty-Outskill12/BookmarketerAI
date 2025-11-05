@@ -1,7 +1,7 @@
 import { Send, Mic, Loader2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { n8nChatService, ChatMessage } from './lib/n8nChatService';
-import { saveMessage, loadChatHistory } from './lib/chatStorage';
+import { saveMessage, loadChatHistory, hasUserChatHistory, insertWelcomeMessage } from './lib/chatStorage';
 
 interface ChatInterfaceProps {
   userId?: string;
@@ -43,14 +43,29 @@ export default function ChatInterface({
 
     setIsLoadingHistory(true);
     try {
-      const history = await loadChatHistory(userId, conversationId);
-      const chatMessages: ChatMessage[] = history.map(msg => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-        timestamp: new Date(msg.created_at)
-      }));
-      setMessages(chatMessages);
+      const hasChatHistory = await hasUserChatHistory(userId);
+
+      if (!hasChatHistory) {
+        const welcomeMsg = await insertWelcomeMessage(userId);
+        if (welcomeMsg) {
+          const chatMessage: ChatMessage = {
+            id: welcomeMsg.id,
+            role: 'assistant',
+            content: welcomeMsg.content,
+            timestamp: new Date(welcomeMsg.created_at)
+          };
+          setMessages([chatMessage]);
+        }
+      } else {
+        const history = await loadChatHistory(userId, conversationId);
+        const chatMessages: ChatMessage[] = history.map(msg => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.created_at)
+        }));
+        setMessages(chatMessages);
+      }
     } catch (error) {
       console.error('Error loading chat history:', error);
     } finally {

@@ -97,3 +97,52 @@ export async function getLatestConversationId(userId: string): Promise<string | 
     return null;
   }
 }
+
+export async function hasUserChatHistory(userId: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking chat history:', error);
+      return false;
+    }
+
+    return !!data;
+  } catch (error) {
+    console.error('Error checking chat history:', error);
+    return false;
+  }
+}
+
+export async function insertWelcomeMessage(userId: string): Promise<StoredChatMessage | null> {
+  const welcomeMessage = "Tell us about your book (name, genre, summary)";
+
+  try {
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .insert({
+        user_id: userId,
+        role: 'assistant',
+        content: welcomeMessage,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error inserting welcome message:', error);
+      return null;
+    }
+
+    return data as StoredChatMessage;
+  } catch (error) {
+    console.error('Error inserting welcome message:', error);
+    return null;
+  }
+}
