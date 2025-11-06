@@ -1,0 +1,266 @@
+{
+  "name": "BookmarketerAI Chat Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "f97b5212-483e-4e5d-a2bc-4760649f187f/chat",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "f97b5212-483e-4e5d-a2bc-4760649f187f"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.message }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validate-request",
+      "name": "Validate Request",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Build conversation context\nconst webhookData = $input.first().json.body;\n\n// System prompt for BookmarketerAI\nconst systemPrompt = `You are an AI assistant for BookmarketerAI, helping authors create effective marketing strategies for their books. \n\nYour responsibilities:\n- Help authors understand their target audience\n- Suggest marketing channels and strategies\n- Provide actionable advice for book promotion\n- Ask clarifying questions when needed\n- Be professional, helpful, and encouraging\n\nGather information about:\n- Book title, genre, and summary\n- Target audience demographics\n- Author's marketing goals\n- Budget and timeline\n- Current marketing efforts`;\n\nconst messages = [\n  {\n    role: \"system\",\n    content: systemPrompt\n  },\n  {\n    role: \"user\",\n    content: webhookData.message\n  }\n];\n\nreturn {\n  messages: messages,\n  userId: webhookData.userId,\n  conversationId: webhookData.conversationId || `conv_${Date.now()}`,\n  context: webhookData.context || {}\n};"
+      },
+      "id": "build-context",
+      "name": "Build Context",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "HTTP-Referer",
+              "value": "https://bookmarketerai.com"
+            },
+            {
+              "name": "X-Title",
+              "value": "BookmarketerAI"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParametersJson": "={\n  \"model\": \"anthropic/claude-3.5-sonnet\",\n  \"messages\": {{ JSON.stringify($json.messages) }},\n  \"temperature\": 0.7,\n  \"max_tokens\": 1000,\n  \"top_p\": 1,\n  \"stream\": false\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "openrouter-request",
+      "name": "OpenRouter API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [850, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1",
+          "name": "OpenRouter API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse OpenRouter response\nconst openRouterResponse = $input.first().json;\nconst contextNode = $('Build Context').first().json;\n\nlet aiMessage = '';\nlet success = true;\n\ntry {\n  if (openRouterResponse.choices && openRouterResponse.choices.length > 0) {\n    aiMessage = openRouterResponse.choices[0].message.content;\n  } else if (openRouterResponse.error) {\n    aiMessage = `I apologize, but I encountered an error: ${openRouterResponse.error.message}. Please try again.`;\n    success = false;\n  } else {\n    aiMessage = 'I apologize, but I was unable to generate a response. Please try again.';\n    success = false;\n  }\n} catch (error) {\n  aiMessage = 'An unexpected error occurred. Please try again.';\n  success = false;\n}\n\nreturn {\n  response: aiMessage,\n  conversationId: contextNode.conversationId,\n  userId: contextNode.userId,\n  success: success,\n  metadata: {\n    model: openRouterResponse.model || 'unknown',\n    tokensUsed: openRouterResponse.usage?.total_tokens || 0,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "parse-response",
+      "name": "Parse Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": {{ $json.success }},\n  \"response\": {{ JSON.stringify($json.response) }},\n  \"conversationId\": {{ JSON.stringify($json.conversationId) }},\n  \"timestamp\": {{ JSON.stringify($json.metadata.timestamp) }}\n}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, Authorization, X-Webhook-Auth"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"Message is required and cannot be empty\",\n  \"response\": \"Sorry, I didn't receive a valid message. Please try again.\",\n  \"conversationId\": null\n}",
+        "options": {
+          "responseCode": 400,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-error",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Log error for monitoring\nconst error = $input.first().json;\nconsole.error('Workflow Error:', error);\n\nreturn {\n  success: false,\n  error: 'An unexpected error occurred',\n  response: 'I apologize, but I\\'m having trouble processing your request. Please try again in a moment.',\n  conversationId: null,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "error-handler",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [850, 400],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 500,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "respond-error-handler",
+      "name": "Respond Error Handler",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Request": {
+      "main": [
+        [
+          {
+            "node": "Build Context",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Context": {
+      "main": [
+        [
+          {
+            "node": "OpenRouter API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter API": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2024-11-06T18:00:00.000Z",
+  "versionId": "1"
+}

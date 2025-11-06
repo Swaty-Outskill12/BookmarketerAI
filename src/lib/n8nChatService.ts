@@ -1,4 +1,5 @@
-const N8N_WEBHOOK_URL = 'https://n8n.usatinc.com/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat';
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.usatinc.com/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat';
+const N8N_WEBHOOK_API_KEY = import.meta.env.VITE_N8N_WEBHOOK_API_KEY;
 
 export interface ChatMessage {
   id: string;
@@ -18,6 +19,12 @@ export interface N8NWebhookResponse {
   response: string;
   conversationId?: string;
   error?: string;
+  success?: boolean;
+  data?: {
+    response?: string;
+    message?: string;
+    text?: string;
+  };
 }
 
 export class N8NChatService {
@@ -39,6 +46,10 @@ export class N8NChatService {
     context?: Record<string, unknown>
   ): Promise<N8NWebhookResponse> {
     try {
+      if (!N8N_WEBHOOK_URL) {
+        throw new Error('N8N webhook URL is not configured');
+      }
+
       const payload: N8NWebhookRequest = {
         message,
         userId,
@@ -46,27 +57,62 @@ export class N8NChatService {
         context
       };
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      if (N8N_WEBHOOK_API_KEY) {
+        headers['X-Webhook-Auth'] = N8N_WEBHOOK_API_KEY;
+        headers['Authorization'] = `Bearer ${N8N_WEBHOOK_API_KEY}`;
+      }
+
       const response = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error(`Webhook request failed: ${response.statusText}`);
+        let errorMessage = `Webhook request failed: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error || errorData.message) {
+            errorMessage = errorData.error || errorData.message;
+          }
+        } catch {
+          const errorText = await response.text();
+          if (errorText) {
+            errorMessage = errorText;
+          }
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
 
+      const aiResponse =
+        data.response ||
+        data.data?.response ||
+        data.data?.message ||
+        data.data?.text ||
+        data.message ||
+        data.text ||
+        data.output ||
+        'No response from AI';
+
       return {
-        response: data.response || data.message || data.text || 'No response from AI',
-        conversationId: data.conversationId || conversationId,
+        response: aiResponse,
+        conversationId: data.conversationId || data.conversation_id || conversationId,
+        success: data.success !== false,
       };
     } catch (error) {
       console.error('Error sending message to n8n webhook:', error);
-      throw new Error('Failed to send message. Please try again.');
+
+      if (error instanceof Error) {
+        throw error;
+      }
+
+      throw new Error('Failed to send message. Please check your connection and try again.');
     }
   }
 
