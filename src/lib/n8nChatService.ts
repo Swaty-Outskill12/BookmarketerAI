@@ -1,4 +1,4 @@
-const N8N_WEBHOOK_URL = 'https://ankursaxenaiit.app.n8n.cloud/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat';
+const N8N_WEBHOOK_URL = 'https://n8n.usatinc.com/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat';
 
 export interface ChatMessage {
   id: string;
