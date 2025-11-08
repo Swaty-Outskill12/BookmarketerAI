@@ -1,3 +1,5 @@
+import { saveChatMessage, generateConversationId } from './chatService';
+
 const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL || 'https://n8n.usatinc.com/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat';
 const N8N_WEBHOOK_API_KEY = import.meta.env.VITE_N8N_WEBHOOK_API_KEY;
 
@@ -50,10 +52,25 @@ export class N8NChatService {
         throw new Error('N8N webhook URL is not configured');
       }
 
+      if (!userId) {
+        throw new Error('User ID is required to send messages');
+      }
+
+      const finalConversationId = conversationId || generateConversationId();
+
+      console.log('N8N Service: Saving user message to Supabase...');
+      await saveChatMessage({
+        user_id: userId,
+        marketing_plan_id: context?.marketingPlanId as string | undefined,
+        conversation_id: finalConversationId,
+        role: 'user',
+        content: message,
+      });
+
       const payload: N8NWebhookRequest = {
         message,
         userId,
-        conversationId,
+        conversationId: finalConversationId,
         context
       };
 
@@ -66,6 +83,7 @@ export class N8NChatService {
         headers['Authorization'] = `Bearer ${N8N_WEBHOOK_API_KEY}`;
       }
 
+      console.log('N8N Service: Sending message to webhook...');
       const response = await fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
         headers,
@@ -100,9 +118,18 @@ export class N8NChatService {
         data.output ||
         'No response from AI';
 
+      console.log('N8N Service: Saving assistant response to Supabase...');
+      await saveChatMessage({
+        user_id: userId,
+        marketing_plan_id: context?.marketingPlanId as string | undefined,
+        conversation_id: finalConversationId,
+        role: 'assistant',
+        content: aiResponse,
+      });
+
       return {
         response: aiResponse,
-        conversationId: data.conversationId || data.conversation_id || conversationId,
+        conversationId: finalConversationId,
         success: data.success !== false,
       };
     } catch (error) {

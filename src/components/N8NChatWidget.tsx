@@ -10,7 +10,7 @@ interface N8NChatWidgetProps {
 
 export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) {
   const { user } = useAuth();
-  const { currentPage, marketingPlanId, bookBriefData } = useChatContext();
+  const { currentPage, marketingPlanId, bookBriefData, conversationId, setConversationId } = useChatContext();
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -18,15 +18,26 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
 
   useEffect(() => {
     if (!user || !isVisible) {
+      console.log('N8N Chat Widget: User not authenticated or not visible');
+      return;
+    }
+
+    if (!chatContainerRef.current) {
+      console.log('N8N Chat Widget: Container ref not ready');
       return;
     }
 
     const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL;
 
     if (!webhookUrl) {
+      console.error('N8N Chat Widget: Webhook URL not configured');
       setError('Chat is not configured. Please check your environment settings.');
       return;
     }
+
+    console.log('N8N Chat Widget: Initializing chat for user:', user.id);
+    console.log('N8N Chat Widget: Current page:', currentPage);
+    console.log('N8N Chat Widget: Webhook URL:', webhookUrl);
 
     try {
       const context: Record<string, unknown> = {
@@ -65,7 +76,10 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
         }
       };
 
+      console.log('N8N Chat Widget: Creating chat instance...');
+
       const chatInstance = createChat({
+        target: '#n8n-chat-container',
         webhookUrl,
         webhookConfig: {
           method: 'POST',
@@ -89,8 +103,10 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
         chatInputKey: 'message',
         chatSessionKey: 'sessionId',
         defaultLanguage: 'en',
+        showWelcomeScreen: false,
       });
 
+      console.log('N8N Chat Widget: Chat instance created successfully');
       chatInstanceRef.current = chatInstance;
       setIsInitialized(true);
       setError(null);
@@ -102,6 +118,7 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
     return () => {
       if (chatInstanceRef.current && typeof chatInstanceRef.current.destroy === 'function') {
         try {
+          console.log('N8N Chat Widget: Destroying chat instance');
           chatInstanceRef.current.destroy();
         } catch (err) {
           console.error('Error destroying chat instance:', err);
@@ -133,7 +150,17 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
   }
 
   return (
-    <div ref={chatContainerRef} className="n8n-chat-widget-container">
+    <div
+      id="n8n-chat-container"
+      ref={chatContainerRef}
+      className="n8n-chat-widget-container"
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        right: 0,
+        zIndex: 9999
+      }}
+    >
     </div>
   );
 }
