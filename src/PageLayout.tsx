@@ -3,6 +3,7 @@ import Header from './components/Header';
 import ProgressStepper from './ProgressStepper';
 import N8NChatWidget from './components/N8NChatWidget';
 import { useChatContext } from './contexts/ChatContext';
+import { useAuth } from './AuthContext';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -12,7 +13,8 @@ interface PageLayoutProps {
 }
 
 export default function PageLayout({ children, currentStep, onNavigate, onStepClick }: PageLayoutProps) {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
   const { setCurrentPage } = useChatContext();
 
   useEffect(() => {
