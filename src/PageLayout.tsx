@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Header from './components/Header';
 import ProgressStepper from './ProgressStepper';
 
@@ -9,8 +9,20 @@ interface PageLayoutProps {
   onStepClick?: (stepId: string) => void;
 }
 
+declare global {
+  interface Window {
+    initN8NChat?: () => void;
+  }
+}
+
 export default function PageLayout({ children, currentStep, onNavigate, onStepClick }: PageLayoutProps) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+
+  useEffect(() => {
+    if (isAuthenticated && typeof window.initN8NChat === 'function') {
+      window.initN8NChat();
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] flex flex-col">
