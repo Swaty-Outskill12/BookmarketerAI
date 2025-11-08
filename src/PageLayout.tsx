@@ -1,6 +1,8 @@
 import { ReactNode, useEffect } from 'react';
 import Header from './components/Header';
 import ProgressStepper from './ProgressStepper';
+import N8NChatWidget from './components/N8NChatWidget';
+import { useChatContext } from './contexts/ChatContext';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -9,20 +11,13 @@ interface PageLayoutProps {
   onStepClick?: (stepId: string) => void;
 }
 
-declare global {
-  interface Window {
-    initN8NChat?: () => void;
-  }
-}
-
 export default function PageLayout({ children, currentStep, onNavigate, onStepClick }: PageLayoutProps) {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const { setCurrentPage } = useChatContext();
 
   useEffect(() => {
-    if (isAuthenticated && typeof window.initN8NChat === 'function') {
-      window.initN8NChat();
-    }
-  }, [isAuthenticated]);
+    setCurrentPage(currentStep);
+  }, [currentStep, setCurrentPage]);
 
   return (
     <div className="min-h-screen bg-[#F9F9F9] flex flex-col">
@@ -39,6 +34,8 @@ export default function PageLayout({ children, currentStep, onNavigate, onStepCl
       <div className="flex-1 flex flex-col lg:flex-row">
         {children}
       </div>
+
+      <N8NChatWidget isVisible={isAuthenticated} />
     </div>
   );
 }

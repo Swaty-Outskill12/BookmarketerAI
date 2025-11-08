@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useChatContext } from './contexts/ChatContext';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Problem from './components/Problem';
@@ -28,7 +29,12 @@ type ViewType = 'homepage' | 'auth' | 'dashboard' | 'plan-view' | 'analytics' | 
 
 function App() {
   const { user, loading } = useAuth();
+  const { setCurrentPage } = useChatContext();
   const [currentView, setCurrentView] = useState<ViewType>('homepage');
+
+  useEffect(() => {
+    setCurrentPage(currentView);
+  }, [currentView, setCurrentPage]);
 
   const heroRef = useRef<HTMLDivElement>(null);
   const howItWorksRef = useRef<HTMLDivElement>(null);

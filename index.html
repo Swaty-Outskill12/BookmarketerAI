@@ -4,30 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Blank (duplicated)</title>
-    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <title>BookmarketerAI</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script type="module">
-      import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
-      window.initN8NChat = function() {
-        createChat({
-          webhookUrl: 'https://n8n.usatinc.com/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat',
-          initialMessages: ['Hello! How can I help you with your book marketing today?'],
-          i18n: {
-            en: {
-              title: 'Marketing Assistant',
-              subtitle: 'Ask me anything about your campaign',
-              footer: '',
-              getStarted: 'New Conversation',
-              inputPlaceholder: 'Type your message...',
-            }
-          }
-        });
-      };
-    </script>
   </body>
 </html>
