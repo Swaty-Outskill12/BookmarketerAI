@@ -33,11 +33,15 @@ export default function PageLayout({ children, currentStep, onNavigate, onStepCl
 
       <ProgressStepper currentStep={currentStep} onStepClick={onStepClick} />
 
-      <div className="flex-1 flex flex-col lg:flex-row">
-        {children}
-      </div>
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <div className="w-full lg:w-[40%] bg-white border-r border-gray-200 flex flex-col">
+          <N8NChatWidget isVisible={isAuthenticated} />
+        </div>
 
-      <N8NChatWidget isVisible={isAuthenticated} />
+        <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

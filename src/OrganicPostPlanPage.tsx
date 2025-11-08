@@ -1,15 +1,11 @@
 import { ArrowLeft } from 'lucide-react';
 
-import ChatInterface from './ChatInterface';
-import { useAuth } from './AuthContext';
-
 interface OrganicPostPlanPageProps {
   onBack: () => void;
   onHelp?: () => void;
 }
 
 export default function OrganicPostPlanPage({ onBack, onHelp }: OrganicPostPlanPageProps) {
-  const { user } = useAuth();
   const posts = [
     {
       id: 1,
@@ -32,10 +28,7 @@ export default function OrganicPostPlanPage({ onBack, onHelp }: OrganicPostPlanP
   ];
 
   return (
-    <>
-      <ChatInterface userId={user?.id} showPlanButton={false} />
-
-      <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
+    <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
         <div className="max-w-4xl">
           <div className="flex items-center justify-between mb-6">
             <button
@@ -100,6 +93,5 @@ export default function OrganicPostPlanPage({ onBack, onHelp }: OrganicPostPlanP
           </div>
         </div>
       </div>
-    </>
   );
 }

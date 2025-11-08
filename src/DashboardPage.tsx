@@ -14,36 +14,34 @@ export default function DashboardPage({ onViewTask }: DashboardPageProps) {
   ];
 
   return (
-    <>
-      <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
-        <div className="max-w-3xl">
-          <div className="space-y-4">
-            {tasks.map((task) => (
-              <div
-                key={task.id}
-                className="flex items-center justify-between py-4 border-b border-gray-200 last:border-b-0"
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <span
-                    className={`text-sm font-semibold ${
-                      task.status === 'Done' ? 'text-green-600' : 'text-gray-400'
-                    }`}
-                  >
-                    {task.status}
-                  </span>
-                  <span className="text-base text-gray-800">{task.title}</span>
-                </div>
-                <button
-                  onClick={() => onViewTask(task.action)}
-                  className="text-[#0077be] hover:text-[#22c9a8] font-medium text-sm transition-colors"
+    <div className="flex-1 bg-white p-6 sm:p-8 lg:p-12 overflow-y-auto">
+      <div className="max-w-3xl">
+        <div className="space-y-4">
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className="flex items-center justify-between py-4 border-b border-gray-200 last:border-b-0"
+            >
+              <div className="flex items-center gap-4 flex-1">
+                <span
+                  className={`text-sm font-semibold ${
+                    task.status === 'Done' ? 'text-green-600' : 'text-gray-400'
+                  }`}
                 >
-                  View
-                </button>
+                  {task.status}
+                </span>
+                <span className="text-base text-gray-800">{task.title}</span>
               </div>
-            ))}
-          </div>
+              <button
+                onClick={() => onViewTask(task.action)}
+                className="text-[#0077be] hover:text-[#22c9a8] font-medium text-sm transition-colors"
+              >
+                View
+              </button>
+            </div>
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -99,7 +99,7 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
           },
         },
         metadata: context,
-        mode: 'window',
+        mode: 'fullscreen',
         chatInputKey: 'message',
         chatSessionKey: 'sessionId',
         defaultLanguage: 'en',
@@ -155,10 +155,10 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
       ref={chatContainerRef}
       className="n8n-chat-widget-container"
       style={{
-        position: 'fixed',
-        bottom: 0,
-        right: 0,
-        zIndex: 9999
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
     </div>
