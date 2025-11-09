@@ -14,7 +14,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const body = await req.json();
-    
+
     const response = await fetch('https://ankursaxenaiit.app.n8n.cloud/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat', {
       method: 'POST',
       headers: {
@@ -24,10 +24,12 @@ Deno.serve(async (req: Request) => {
     });
 
     const responseText = await response.text();
-    
+    console.log('n8n raw response:', responseText);
+
     let data;
     try {
       data = JSON.parse(responseText);
+      console.log('n8n parsed response:', JSON.stringify(data, null, 2));
     } catch (e) {
       console.error('n8n response is not JSON:', responseText);
       data = { output: responseText };
