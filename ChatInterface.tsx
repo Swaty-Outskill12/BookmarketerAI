@@ -31,7 +31,9 @@ export default function ChatInterface({ onViewPlan, showPlanButton = true }: Cha
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://ankursaxenaiit.app.n8n.cloud/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat', {
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-proxy`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
