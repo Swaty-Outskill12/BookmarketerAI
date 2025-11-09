@@ -79,7 +79,6 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
       console.log('N8N Chat Widget: Creating chat instance...');
 
       const chatInstance = createChat({
-        target: '#n8n-chat-container',
         webhookUrl,
         webhookConfig: {
           method: 'POST',
@@ -99,12 +98,13 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
           },
         },
         metadata: context,
-        mode: 'window',
         chatInputKey: 'message',
         chatSessionKey: 'sessionId',
         defaultLanguage: 'en',
         showWelcomeScreen: false,
       });
+
+      chatInstance.mount('#n8n-chat-container');
 
       console.log('N8N Chat Widget: Chat instance created successfully');
       chatInstanceRef.current = chatInstance;
@@ -153,12 +153,11 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
     <div
       id="n8n-chat-container"
       ref={chatContainerRef}
-      className="n8n-chat-widget-container"
       style={{
         width: '100%',
         height: '100%',
-        minHeight: '600px',
-        position: 'relative'
+        display: 'flex',
+        flexDirection: 'column'
       }}
     >
     </div>
