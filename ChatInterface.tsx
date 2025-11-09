@@ -1,82 +1,137 @@
-import { useEffect, useRef } from 'react';
+import { useState } from 'react';
+import { Send, Mic } from 'lucide-react';
 
 interface ChatInterfaceProps {
   onViewPlan?: () => void;
   showPlanButton?: boolean;
 }
 
-declare global {
-  interface Window {
-    n8nChatInstance?: any;
-  }
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export default function ChatInterface({ onViewPlan, showPlanButton = true }: ChatInterfaceProps) {
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const scriptLoadedRef = useRef(false);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: 'Hi there! I am here to help you create a marketing plan for your book. What is the name of your book?'
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (scriptLoadedRef.current || !chatContainerRef.current) return;
-    scriptLoadedRef.current = true;
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
-    const containerId = 'n8n-chat-container';
-    chatContainerRef.current.id = containerId;
+    const userMessage = input.trim();
+    setInput('');
 
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.innerHTML = `
-      import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsLoading(true);
 
-      const container = document.getElementById('${containerId}');
-      if (container && !window.n8nChatInstance) {
-        window.n8nChatInstance = createChat({
-          webhookUrl: 'https://ankursaxenaiit.app.n8n.cloud/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat',
-          target: '#${containerId}',
-          mode: 'fullscreen',
-          chatInputKey: 'chatInput',
-          chatSessionKey: 'sessionId',
-          showWelcomeScreen: false,
-          initialMessages: [
-            'Hi there! I am here to help you create a marketing plan for your book. What is the name of your book?'
-          ],
-          i18n: {
-            en: {
-              title: 'Book Marketing Assistant',
-              subtitle: 'Let me help you create a marketing plan',
-              footer: '',
-              inputPlaceholder: 'Type your message...',
-            },
-          },
-        });
+    try {
+      const response = await fetch('https://ankursaxenaiit.app.n8n.cloud/webhook/f97b5212-483e-4e5d-a2bc-4760649f187f/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'sendMessage',
+          chatInput: userMessage,
+          sessionId: localStorage.getItem('n8n-chat-session') || `session-${Date.now()}`
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to send message');
+
+      const data = await response.json();
+
+      if (!localStorage.getItem('n8n-chat-session')) {
+        localStorage.setItem('n8n-chat-session', data.sessionId || `session-${Date.now()}`);
       }
-    `;
 
-    document.body.appendChild(script);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: data.output || data.message || 'I received your message!'
+      }]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.'
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    return () => {
-      if (script.parentNode) {
-        script.remove();
-      }
-      if (window.n8nChatInstance) {
-        window.n8nChatInstance = undefined;
-      }
-    };
-  }, []);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
 
   return (
-    <div className="w-full lg:w-[40%] bg-white border-r border-gray-200 flex flex-col relative">
-      <div ref={chatContainerRef} className="flex-1 w-full h-full overflow-hidden" />
+    <div className="w-full lg:w-[40%] bg-white border-r border-gray-200 flex flex-col">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+        {messages.map((message, index) => (
+          <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+              message.role === 'user'
+                ? 'bg-gray-200 rounded-tr-sm'
+                : 'bg-white border border-gray-200 rounded-tl-sm shadow-sm'
+            }`}>
+              <p className="text-sm text-gray-800 whitespace-pre-wrap">{message.content}</p>
+            </div>
+          </div>
+        ))}
 
-      {showPlanButton && (
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent pointer-events-none">
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="max-w-[85%] bg-white border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+              <p className="text-sm text-gray-500">Typing...</p>
+            </div>
+          </div>
+        )}
+
+        {showPlanButton && messages.length > 4 && (
+          <div className="pt-2">
+            <button
+              onClick={onViewPlan}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              View and Approve Your Book's Marketing Plan
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-gray-200 p-4 bg-white">
+        <div className="flex items-center gap-2">
+          <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+            <Mic size={20} />
+          </button>
+          <input
+            type="text"
+            placeholder="Type your message..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+          />
           <button
-            onClick={onViewPlan}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg pointer-events-auto"
+            onClick={handleSend}
+            disabled={isLoading || !input.trim()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            View and Approve Your Book's Marketing Plan
+            <Send size={18} />
+            <span className="hidden sm:inline">Send</span>
           </button>
         </div>
-      )}
+      </div>
     </div>
   );
 }
