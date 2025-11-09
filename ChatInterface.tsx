@@ -98,16 +98,6 @@ export default function ChatInterface({ onViewPlan, showPlanButton = true }: Cha
           </div>
         )}
 
-        {showPlanButton && messages.length > 4 && (
-          <div className="pt-2">
-            <button
-              onClick={onViewPlan}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              View and Approve Your Book's Marketing Plan
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="border-t border-gray-200 p-4 bg-white">

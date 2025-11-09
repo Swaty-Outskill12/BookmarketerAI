@@ -23,7 +23,15 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(body)
     });
 
-    const data = await response.json();
+    const responseText = await response.text();
+    
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (e) {
+      console.error('n8n response is not JSON:', responseText);
+      data = { output: responseText };
+    }
 
     return new Response(
       JSON.stringify(data),
@@ -35,8 +43,9 @@ Deno.serve(async (req: Request) => {
       }
     );
   } catch (error) {
+    console.error('Edge function error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message, output: 'Sorry, I encountered an error connecting to the chat service.' }),
       {
         status: 500,
         headers: {
