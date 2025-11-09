@@ -14,7 +14,6 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const chatInstanceRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user || !isVisible) {
@@ -78,7 +77,8 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
 
       console.log('N8N Chat Widget: Creating chat instance...');
 
-      const chatInstance = createChat({
+      createChat({
+        target: chatContainerRef.current,
         webhookUrl,
         webhookConfig: {
           method: 'POST',
@@ -104,10 +104,7 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
         showWelcomeScreen: false,
       });
 
-      chatInstance.mount('#n8n-chat-container');
-
       console.log('N8N Chat Widget: Chat instance created successfully');
-      chatInstanceRef.current = chatInstance;
       setIsInitialized(true);
       setError(null);
     } catch (err) {
@@ -116,12 +113,12 @@ export default function N8NChatWidget({ isVisible = true }: N8NChatWidgetProps) 
     }
 
     return () => {
-      if (chatInstanceRef.current && typeof chatInstanceRef.current.destroy === 'function') {
+      if (chatContainerRef.current) {
         try {
-          console.log('N8N Chat Widget: Destroying chat instance');
-          chatInstanceRef.current.destroy();
+          console.log('N8N Chat Widget: Clearing container');
+          chatContainerRef.current.innerHTML = '';
         } catch (err) {
-          console.error('Error destroying chat instance:', err);
+          console.error('Error clearing container:', err);
         }
       }
       setIsInitialized(false);
